@@ -1,0 +1,23 @@
+# playwright_write_safety.rules
+# Technology: playwright | Capability: write
+
+rule playwright-warn-ignore-https-errors {
+  enabled true
+  priority 90
+  severity error
+  DENY write
+  IF path GLOB "**/playwright.config.ts" AND content CONTAINS "ignoreHTTPSErrors: true"
+  OR path GLOB "**/*.spec.ts" AND content CONTAINS "ignoreHTTPSErrors: true"
+  MESSAGE "Using ignoreHTTPSErrors: true exposes the test execution to Man-in-the-Middle (MitM) attacks. Do not use this when testing against production or public-facing sites."
+}
+
+rule playwright-warn-evaluate-injection {
+  enabled true
+  priority 85
+  severity warning
+  ASK write
+  IF path GLOB "**/*.spec.ts" AND content LINE_REGEX "\\.evaluate\\(.*`.*\\$\\{.*\\}.*`"
+  OR path GLOB "**/*.ts" AND content LINE_REGEX "\\.evaluate\\(.*`.*\\$\\{.*\\}.*`"
+  MESSAGE "Using string interpolation inside page.evaluate() can lead to arbitrary JavaScript execution in the browser context (XSS equivalent). Pass variables as arguments to evaluate instead."
+  PROMPT "Are you sure the string interpolation does not contain unvalidated or untrusted input? It is safer to pass variables as the second argument to evaluate()."
+}
