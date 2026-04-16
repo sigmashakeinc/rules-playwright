@@ -15,9 +15,8 @@ rule playwright-warn-evaluate-injection {
   enabled true
   priority 85
   severity warning
-  ASK write
+  LOG write
   IF path GLOB "**/*.spec.ts" AND content LINE_REGEX "\\.evaluate\\(.*`.*\\$\\{.*\\}.*`"
   OR path GLOB "**/*.ts" AND content LINE_REGEX "\\.evaluate\\(.*`.*\\$\\{.*\\}.*`"
   MESSAGE "Using string interpolation inside page.evaluate() can lead to arbitrary JavaScript execution in the browser context (XSS equivalent). Pass variables as arguments to evaluate instead."
-  PROMPT "Are you sure the string interpolation does not contain unvalidated or untrusted input? It is safer to pass variables as the second argument to evaluate()."
 }
